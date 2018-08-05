@@ -4,33 +4,6 @@ SHELL=bash
 
 NETWORK_NAME=api-sql-angular
 
-DB_TAG=pg-db-tag
-DB_WORKDIR=/var/workdir/db
-DB_NAME=pg-postgres-name
-
-# Postgres port cannot be modified in onjin/alpine-postgres
-POSTGRES_USER=postgres_user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=postgres
-POSTGRES_HOST=postgres-host
-POSTGRES_PORT=5432
-
-API_TAG=pg-api-tag
-API_NAME=pg-api-name
-API_WORKDIR=/var/workdir/api
-API_HOST=api-host
-API_PORT=5001
-
-APOLLO_SCHEMA=src/app/gen/schema.json
-APOLLO_TYPES=src/app/gen/apollo-types.ts
-
-ANGULAR_NAME=angular
-ANGULAR_WORKDIR=/var/angular
-ANGULAR_TAG_DEV=angular:dev
-ANGULAR_TAG_PROD=angular:prod
-ANGULAR_PORT=9001
-ANGULAR_HOST=angular-host
-
 # Docker commands
 network:
 	-docker network rm $(NETWORK_NAME)
@@ -134,3 +107,38 @@ angular-dev:
 		-e API_PORT=$(API_PORT) \
 		-e ANGULAR_PORT=$(ANGULAR_PORT) \
 		$(ANGULAR_TAG_DEV)
+
+
+##################################################
+# Kubernetes
+##################################################
+start:
+	minikube start --logtostderr --vm-driver=hyperkit --kubernetes-version="v1.11.1"
+	kubectl config use-context minikube
+
+build:
+	eval $$(minikube docker-env) \
+		&& export $$(cat configs/dev.properties | xargs) \
+		&& envsubst < ./db/Dockerfile | docker build -t db:v1 \
+			./db/ -f-
+	eval $$(minikube docker-env) \
+		&& export $$(cat configs/dev.properties | xargs) \
+		&& envsubst < ./api/Dockerfile | docker build -t api:v1 \
+			./api/ -f-
+
+create:
+	kubectl create configmap config --from-env-file=configs/dev.properties
+	kubectl create -f db/db.yaml
+	kubectl create -f api/api.yaml
+
+api-logs:
+	kubectl logs `kubectl get pods -o custom-columns=:metadata.name | grep "api-deployment"`
+
+k8s-seed:
+	kubectl exec -it `kubectl get pods -o custom-columns=:metadata.name | grep "db-deployment"` \
+		sh load.sh schema-drop.sql schema.sql data.sql
+
+delete:
+	-kubectl delete configmap config
+	-kubectl delete -f db/db.yaml
+	-kubectl delete -f api/api.yaml

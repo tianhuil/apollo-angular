@@ -33,10 +33,10 @@ app.use(
   )
 );
 
-console.log(`Connecting to postgres://${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`)
+console.log(`Connecting to postgres://${POSTGRES_USER}:[PASSWORD]@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`)
 
 app.listen(
   API_PORT,
-  API_HOST || '0.0.0.0',
+  '0.0.0.0',
   callback=() => console.log(`Listening on port ${API_PORT}`)
 );
