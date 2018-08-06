@@ -135,7 +135,7 @@ api-logs:
 	kubectl logs `kubectl get pods -o custom-columns=:metadata.name | grep "api-deployment"`
 
 k8s-seed:
-	kubectl exec -it `kubectl get pods -o custom-columns=:metadata.name | grep "db-deployment"` \
+	kubectl exec -it `kubectl get pods | grep "db-deployment" | grep "Running" | cut -d " " -f1` \
 		sh load.sh schema-drop.sql schema.sql data.sql
 
 delete:
