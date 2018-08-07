@@ -121,6 +121,7 @@ build:
 		&& export $$(cat configs/dev.properties | xargs) \
 		&& envsubst < ./db/Dockerfile | docker build -t db:v1 \
 			./db/ -f-
+
 	eval $$(minikube docker-env) \
 		&& export $$(cat configs/dev.properties | xargs) \
 		&& envsubst < ./api/Dockerfile | docker build -t api:v1 \
