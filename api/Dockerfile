@@ -10,4 +10,4 @@ RUN npm install
 # Cache installation before
 COPY server.js $API_WORKDIR/
 
-CMD [ "node", "server.js" ]
+CMD ["npx", "nodemon", "--legacy-watch", "server.js" ]
