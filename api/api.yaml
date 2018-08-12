@@ -37,3 +37,10 @@ spec:
         env:
         - name: POSTGRES_HOST
           value: "db-service.default.svc.cluster.local"
+        volumeMounts:
+        - name: api-vol
+          mountPath: /var/workdir/api
+      volumes:
+      - name: api-vol
+        hostPath:
+          path: /api-vol

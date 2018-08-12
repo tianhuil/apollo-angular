@@ -158,9 +158,11 @@ create:
 	kubectl create configmap config --from-env-file=configs/dev.properties
 	kubectl create -f db/db.yaml
 	kubectl create -f api/api.yaml
+	kubectl create -f ingress/ingress.yaml
+	minikube mount `pwd`/api:/api-vol
 
 api-logs:
-	kubectl logs `kubectl get pods -o custom-columns=:metadata.name | grep "api-deployment"`
+	kubectl logs -f `kubectl get pods -o custom-columns=:metadata.name | grep "api-deployment"`
 
 k8s-seed:
 	kubectl exec -it `kubectl get pods | grep "db-deployment" | grep "Running" | cut -d " " -f1` \
@@ -170,3 +172,4 @@ delete:
 	-kubectl delete configmap config
 	-kubectl delete -f db/db.yaml
 	-kubectl delete -f api/api.yaml
+	-kubectl delete -f ingress/ingress.yaml

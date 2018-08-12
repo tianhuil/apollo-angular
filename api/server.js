@@ -29,7 +29,7 @@ app.use(
   postgraphile(
     DATABASE_URL,
     "forum_example",
-    options
+    options,
   )
 );
 
